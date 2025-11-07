@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Jonsky Shop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, gold, black);
+      color: white;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+
+    .menu-icon {
+      font-size: 30px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .menu {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      top: 60px;
+      left: 20px;
+      background-color: rgba(0, 0, 0, 0.9);
+      border-radius: 5px;
+      padding: 10px;
+      z-index: 1000;
+    }
+
+    .menu a {
+      color: gold;
+      text-decoration: none;
+      padding: 8px 0;
+      cursor: pointer;
+    }
+
+    .menu a:hover {
+      text-decoration: underline;
+    }
+
+    section {
+      padding: 20px;
+      display: none;
+    }
+
+    section.active {
+      display: block;
+    }
+
+    .product-entry {
+      background-color: rgba(255, 215, 0, 0.1);
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      position: relative;
+    }
+
+    .product-entry input[type="text"],
+    .product-entry input[type="file"] {
+      display: block;
+      margin: 10px 0;
+      padding: 8px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .product-entry img {
+      max-width: 200px;
+      margin-top: 10px;
+      display: block;
+    }
+
+    .delete-btn, .add-btn {
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+
+    .delete-btn {
+      background-color: crimson;
+      color: white;
+    }
+
+    .add-btn {
+      background-color: gold;
+      color: black;
+    }
+
+    @media (max-width: 600px) {
+      .menu {
+        width: 80%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="menu-icon" onclick="toggleMenu()">&#9776;</div>
+    <div class="menu" id="dropdownMenu">
+      <a onclick="showSection('home')">Home</a>
+      <a onclick="showSection('product')">Product</a>
+      <a onclick="showSection('contact')">Contact</a>
+    </div>
+  </header>
+
+  <section id="home" class="active">
+    <h1>Welcome to my Jonsky Shop</h1>
+  </section>
+
+  <section id="product">
+    <h2>Products</h2>
+    <button class="add-btn" onclick="addProduct()">+ Add Product</button>
+    <div id="productList"></div>
+
+  </section>
+
+ <section id="contact">
+  <h2>Contact</h2>
+  <p>Cellphone: 09358252540</p>
+  <p>Facebook: <a href="https://www.facebook.com/tyler.d.well.2025" target="_blank" style="color: gold;">tyler.d.well.2025</a></p>
+
+  <h3>Payment via GCash</h3>
+  <p>Scan the QR code below:</p>
+  <img src="c:\Users\User\Downloads\gcash qr code.jpeg" alt="GCash QR Code">
+</section>
+
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('dropdownMenu');
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function showSection(id) {
+      const sections = document.querySelectorAll('section');
+      sections.forEach(sec => sec.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.getElementById('dropdownMenu').style.display = 'none';
+    }
+
+    let productCount = 0;
+
+    function saveProducts() {
+      const products = [];
+      document.querySelectorAll('.product-entry').forEach(entry => {
+        const img = entry.querySelector('img').src;
+        const name = entry.querySelectorAll('input[type="text"]')[0].value;
+        const price = entry.querySelectorAll('input[type="text"]')[1].value;
+        products.push({ img, name, price });
+      });
+      localStorage.setItem('products', JSON.stringify(products));
+    }
+
+    function addProduct(imgSrc = '', name = '', price = '') {
+      productCount++;
+      const container = document.createElement('div');
+      container.className = 'product-entry';
+      container.innerHTML = `
+        <input type="file" accept="image/*" onchange="handleImageUpload(event, 'preview${productCount}')">
+        <img id="preview${productCount}" src="${imgSrc}" alt="Product Image">
+        <input type="text" placeholder="Item Name" value="${name}">
+        <input type="text" placeholder="Item Price" value="${price}">
+        <button class="add-btn" onclick="saveProducts()">Save</button>
+        <button class="delete-btn" onclick="deleteProduct(this)">Delete</button>
+      `;
+      document.getElementById('productList').appendChild(container);
+    }
+
+    function handleImageUpload(event, imgId) {
+      const reader = new FileReader();
+      reader.onload = function () {
+        document.getElementById(imgId).src = reader.result;
+        saveProducts();
+      };
+      reader.readAsDataURL(event.target.files[0]);
+    }
+
+    function deleteProduct(button) {
+      button.parentElement.remove();
+      saveProducts();
+    }
+
+    function loadProducts() {
+      const saved = localStorage.getItem('products');
+      if (saved) {
+        JSON.parse(saved).forEach(p => addProduct(p.img, p.name, p.price));
+      }
+    }
+
+    window.onload = loadProducts;
+  </script>
+
+</body>
+</html>
